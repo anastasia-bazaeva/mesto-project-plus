@@ -4,10 +4,9 @@ import { IUser } from './user';
 interface ICard {
   name: string,
   link: string,
-  owner: IUser | {_id: string},
+  owner: IUser,
   likes?: Array<IUser> | [],
-  _id?: string
-
+  createdAt: Date
 }
 
 const cardSchema = new mongoose.Schema<ICard>({
@@ -31,8 +30,9 @@ const cardSchema = new mongoose.Schema<ICard>({
     default: [],
     ref: 'user'
   },
-  _id: {
-    type: String
+  createdAt: {
+    type: Date,
+    default: Date.now()
   }
 })
 export default mongoose.model<ICard>('card', cardSchema);

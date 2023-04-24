@@ -18,11 +18,11 @@ export const createCard = (req: RequestWithUserRole, res: Response) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Неверные поля при создании карточки' })
       }
-      res.status(500).send({ message: 'Произошла ошибка при создании карточки' })})
+      res.status(500).send({ message: `Произошла ошибка при создании карточки: ${err.message}` })})
 }
 
 export const deleteCard = (req: Request, res: Response) => {
   return cardSchema.findByIdAndRemove(req.params.cardId)
     .then(card => res.status(200).send(card))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка при создании карточки' }))
+    .catch(() => res.status(500).send({ message: 'Произошла ошибка при удалении карточки' }))
 }
