@@ -14,8 +14,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/users', userRouter);
 app.use(auth);
+app.use('/users', userRouter);
 app.use('/cards', cardsRouter);
 
 app.listen(PORT, () => {

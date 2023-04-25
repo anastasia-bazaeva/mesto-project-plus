@@ -4,7 +4,6 @@ export interface IUser {
   name: string;
   about: string;
   avatar: string;
-  _id?: string;
 }
 const userSchema = new mongoose.Schema<IUser>({
   name: {
@@ -22,9 +21,6 @@ const userSchema = new mongoose.Schema<IUser>({
   avatar: {
     type: String,
     required: true
-  },
-  _id: {
-    type: String,
   }
 });
 export default mongoose.model<IUser>('user', userSchema);
