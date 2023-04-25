@@ -1,8 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import {userRouter} from './routers/user';
-import { IUser } from './models/user';
-import { Request, Response } from 'express';
 import { auth } from './middlewares/auth';
 import { cardsRouter } from './routers/cards';
 
