@@ -14,25 +14,25 @@ const cardSchema = new mongoose.Schema<ICard>({
     type: String,
     required: true,
     minlength: 2,
-    maxlength: 30
+    maxlength: 30,
   },
   link: {
     type: String,
-    required: true
+    required: true,
   },
   owner: {
     type: String,
     ref: 'user',
-    required: true
+    required: true,
   },
   likes: {
     type: Array<mongoose.Schema.Types.ObjectId>,
     default: [],
-    ref: 'user'
+    ref: 'user',
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
-})
+    default: Date.now,
+  },
+});
 export default mongoose.model<ICard>('card', cardSchema);
