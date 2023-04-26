@@ -1,7 +1,7 @@
 {
   "name": "mesto-api",
   "version": "1.0.0",
-  "description": "< Добавьте описание проекта в свободной форме >",
+  "description": "Разработка базы данных и методов для работы с ней в рамках проекта Mesto",
   "main": "dist/app.js",
   "scripts": {
     "lint": "npx eslint src/**/*.ts",
@@ -23,8 +23,6 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.59.0",
-    "@typescript-eslint/parser": "^5.59.1",
     "express": "^4.18.2",
     "mongoose": "^6.10.5"
   },
