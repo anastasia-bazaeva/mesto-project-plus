@@ -1,8 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import {userRouter} from './routers/user';
 import { auth } from './middlewares/auth';
-import { cardsRouter } from './routers/cards';
+import { router } from './routers/router';
 
 const { PORT = 3000 } = process.env;
 
@@ -13,8 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(auth);
-app.use('/users', userRouter);
-app.use('/cards', cardsRouter);
+app.use('/', router);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`)
