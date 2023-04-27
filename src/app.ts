@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { auth } from './middlewares/auth';
-import { router } from './routers/router';
+import router from './routers/router';
 
 const { PORT = 3000 } = process.env;
 
@@ -15,5 +15,5 @@ app.use(auth);
 app.use('/', router);
 
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`)
+  console.log(`App listening on port ${PORT}`);
 });

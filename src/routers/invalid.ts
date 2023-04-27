@@ -1,10 +1,7 @@
-import { invalidUrlHandler } from '../controllers/invalid';
 import { Router } from 'express';
+import invalidUrlHandler from '../controllers/invalid';
 
-export const invalidUrl = Router()
+const invalidUrl = Router();
 
-invalidUrl.get('/', invalidUrlHandler);
-invalidUrl.post('/', invalidUrlHandler);
-invalidUrl.put('/', invalidUrlHandler);
-invalidUrl.delete('/', invalidUrlHandler);
-invalidUrl.patch('/', invalidUrlHandler);
+invalidUrl.all('/', invalidUrlHandler);
+export default invalidUrl;
