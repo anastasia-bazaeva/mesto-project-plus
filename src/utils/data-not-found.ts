@@ -6,13 +6,8 @@ class DataNotFound extends Error {
   constructor(message: string) {
     super(message);
     this.statusCode = NOT_FOUND;
+    this.name = 'NotFoundError';
   }
 }
 
 export default DataNotFound;
-
-// нашла примеры как тут:
-// https://www.geeksforgeeks.org/mongoose-query-prototype-orfail-api/
-// и тут:
-// http://thecodebarbarian.com/whats-new-in-mongoose-53-orfail-and-global-toobject.html ,
-// где ошибка несуществующего документа обрабатывается именно на классах, надеюсь так можно

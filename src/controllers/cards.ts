@@ -5,11 +5,11 @@ import { RequestWithUserRole } from '../middlewares/auth';
 import {
   BAD_REQUEST,
   CREATED_SUCCESSFULLY,
+  NOT_FOUND,
   SERVER_ERROR,
   SUCCESS,
   validationErrorHandler,
 } from '../utils/utils';
-import DataNotFound from '../utils/data-not-found';
 import InvalidID from '../utils/invalid-id';
 
 export const getCards = (req: Request, res: Response) => cardSchema.find({})
@@ -35,9 +35,12 @@ export const createCard = (req: RequestWithUserRole, res: Response) => {
 
 export const deleteCard = (req: Request, res: Response) => {
   cardSchema.findByIdAndRemove(req.params.cardId)
-    .orFail(() => new DataNotFound('Карточка с таким ID не найдена'))
+    .orFail()
     .then((card) => res.status(SUCCESS).send(card))
     .catch((err) => {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
+      }
       if (err instanceof mongoose.Error.CastError) {
         return res.status(BAD_REQUEST).send({ message: 'Передан неверный ID' });
       }
