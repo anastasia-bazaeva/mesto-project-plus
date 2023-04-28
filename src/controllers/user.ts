@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import InvalidRequest from '../utils/invalid-request';
 import userSchema from '../models/user';
 import { RequestWithUserRole } from '../middlewares/auth';
 import {
@@ -33,16 +35,21 @@ export const getUser = (req: Request, res: Response) => {
 };
 
 export const createUser = (req: Request, res: Response) => {
-  const { name, about, avatar } = req.body;
-
-  return userSchema.create({ name, about, avatar })
-    .then((user) => res.status(CREATED_SUCCESSFULLY).send({ data: user }))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        return res.status(BAD_REQUEST).send(validationErrorHandler(err));
-      }
-      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка при создании пользователя' });
-    });
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  if (!(email && password)) throw new InvalidRequest('Неверные данные');
+  bcrypt.hash(password, 10)
+    .then((hash) => userSchema.create({
+      name, about, avatar, email, password: hash,
+    })
+      .then((user) => res.status(CREATED_SUCCESSFULLY).send({ data: user }))
+      .catch((err) => {
+        if (err instanceof mongoose.Error.ValidationError) {
+          return res.status(BAD_REQUEST).send(validationErrorHandler(err));
+        }
+        return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка при создании пользователя' });
+      }));
 };
 
 const updateUser = (req: RequestWithUserRole, res: Response, option: Object) => {
