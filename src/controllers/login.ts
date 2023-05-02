@@ -15,7 +15,7 @@ const login = (req: Request, res: Response, next: NextFunction) => {
         .then((matched) => {
           if (!matched) throw new Error('Пароли не совпадают');
           const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-          res.cookie('authorization-token', token, { httpOnly: true }).end();
+          res.cookie('authorization-token', token, { httpOnly: true, maxAge: 3600000 * 24 * 7 }).end();
         });
     })
     .catch(next);

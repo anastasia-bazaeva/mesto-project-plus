@@ -1,25 +1,22 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
+import Unauthorized from '../utils/unauthorized';
 import cardSchema from '../models/card';
 import { RequestWithUserRole } from '../middlewares/auth';
 import {
-  BAD_REQUEST,
   CREATED_SUCCESSFULLY,
-  NOT_FOUND,
-  SERVER_ERROR,
   SUCCESS,
-  validationErrorHandler,
 } from '../utils/utils';
 import InvalidID from '../utils/invalid-id';
+import InvalidRequest from '../utils/invalid-request';
+import NotFound from '../utils/not-found';
 
-export const getCards = (req: Request, res: Response) => cardSchema.find({})
+export const getCards = (req: Request, res: Response, next: NextFunction) => cardSchema.find({})
   .populate(['owner', 'likes'])
   .then((cards) => res.status(SUCCESS).send({ data: cards }))
-  .catch(() => {
-    res.status(SERVER_ERROR).send({ message: 'Произошла ошибка при загрузке карточек' });
-  });
+  .catch(next);
 
-export const createCard = (req: RequestWithUserRole, res: Response) => {
+export const createCard = (req: RequestWithUserRole, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
   if (!req.user?._id) throw new InvalidID('Авторизованный пользователь не найден');
 
@@ -27,28 +24,31 @@ export const createCard = (req: RequestWithUserRole, res: Response) => {
     .then((card) => res.status(CREATED_SUCCESSFULLY).send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        return res.status(BAD_REQUEST).send(validationErrorHandler(err));
+        throw new InvalidRequest('Введены некорректные данные');
       }
-      return res.status(SERVER_ERROR).send({ message: `Произошла ошибка при создании карточки: ${err.message}` });
+      next(err);
     });
 };
 
-export const deleteCard = (req: Request, res: Response) => {
+export const deleteCard = (req: RequestWithUserRole, res: Response, next: NextFunction) => {
   cardSchema.findByIdAndRemove(req.params.cardId)
     .orFail()
-    .then((card) => res.status(SUCCESS).send(card))
+    .then((card) => {
+      if (card.owner !== req.user?._id) throw new Unauthorized('Вы не владелец карточки', res);
+      res.status(SUCCESS).send(card);
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
+        throw new NotFound('Карточка не найдена');
       }
       if (err instanceof mongoose.Error.CastError) {
-        return res.status(BAD_REQUEST).send({ message: 'Передан неверный ID' });
+        throw new InvalidID('Передан неверный ID');
       }
-      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка при удалении карточки' });
+      next(err);
     });
 };
 
-export const toggleLike = (req: RequestWithUserRole, res: Response) => {
+export const toggleLike = (req: RequestWithUserRole, res: Response, next: NextFunction) => {
   if (!req.user?._id) throw new InvalidID('Авторизованный пользователь не найден');
   cardSchema.findByIdAndUpdate(
     req.params.cardId,
@@ -60,8 +60,8 @@ export const toggleLike = (req: RequestWithUserRole, res: Response) => {
     .then((card) => res.status(SUCCESS).send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        return res.status(BAD_REQUEST).send({ message: 'Передан неверный ID' });
+        throw new InvalidID('Передан неверный ID');
       }
-      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка при нажатии на лайк' });
+      next(err);
     });
 };

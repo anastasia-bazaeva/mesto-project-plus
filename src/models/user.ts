@@ -44,6 +44,7 @@ const userSchema = new mongoose.Schema<IUser>({
   password: {
     type: String,
     required: true,
+    select: false,
   },
 });
 export default mongoose.model<IUser>('user', userSchema);
