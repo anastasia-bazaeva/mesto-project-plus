@@ -12,20 +12,19 @@ export interface RequestWithUserRole extends Request {
 export const auth = (req: RequestWithUserRole, res: Response, next: NextFunction) => {
   const { cookie } = req.headers;
   if (!cookie) {
-    const AuthError = new Unauthorized('Неавторизованный пользователь', res);
-    AuthError.sendRes();
-    throw new Unauthorized('Неавторизованный пользователь', res);
+    next(new Unauthorized('Неавторизованный пользователь'));
   }
-
-  const token = cookie.replace('Bearer ', '');
+  const token = cookie?.replace('Bearer ', '');
   let payload: JwtPayload | string;
   try {
-    payload = verify(token, JWT_SECRET);
+    if (token) {
+      payload = verify(token, JWT_SECRET);
+      req.user = { _id: payload };
+    } else {
+      next(new Unauthorized('Неавторизованный пользователь'));
+    }
   } catch (err) {
-    const AuthError = new Unauthorized('Неавторизованный пользователь', res);
-    AuthError.sendRes();
-    throw new Unauthorized('Неавторизованный пользователь', res);
+    next(err);
   }
-  req.user = { _id: payload };
   next();
 };

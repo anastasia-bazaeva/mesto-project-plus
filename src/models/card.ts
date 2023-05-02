@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
+import validator from 'validator';
 import { IUser } from './user';
+import defaults from '../app-config';
 
 interface ICard {
   name: string,
@@ -19,6 +21,10 @@ const cardSchema = new mongoose.Schema<ICard>({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator: (url: string) => validator.isURL(url),
+      message: 'Некорректная ссылка на изображение',
+    },
   },
   owner: {
     type: String,
@@ -27,7 +33,7 @@ const cardSchema = new mongoose.Schema<ICard>({
   },
   likes: {
     type: Array<mongoose.Schema.Types.ObjectId>,
-    default: [],
+    default: defaults.likes,
     ref: 'user',
   },
   createdAt: {

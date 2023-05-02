@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import validator from 'validator';
+import defaults from '../app-config';
 
 export interface IUser {
   name: string;
@@ -11,26 +12,23 @@ export interface IUser {
 const userSchema = new mongoose.Schema<IUser>({
   name: {
     type: String,
-    required: true,
     minlength: 2,
     maxlength: 30,
-    default: 'Жак-Ив Кусто',
+    default: defaults.username,
   },
   about: {
     type: String,
-    required: true,
     minlength: 2,
     maxlength: 200,
-    default: 'Исследователь',
+    default: defaults.userDescript,
   },
   avatar: {
     type: String,
-    required: true,
     validate: {
       validator: (url: string) => validator.isURL(url),
       message: 'Некорректная ссылка на изображение',
     },
-    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    default: defaults.userAvatar,
   },
   email: {
     type: String,

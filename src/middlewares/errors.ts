@@ -9,7 +9,7 @@ const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunc
   const { statusCode = SERVER_ERROR, message } = err;
   res.status(statusCode).send({
     message: statusCode === SERVER_ERROR
-      ? 'На сервере произошла ошибка'
+      ? `На сервере произошла ошибка: ${err}`
       : message,
   });
   next();
