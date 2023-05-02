@@ -9,7 +9,6 @@ import {
   CREATED_SUCCESSFULLY,
   SUCCESS,
 } from '../utils/utils';
-import InvalidID from '../utils/invalid-id';
 import NotFound from '../utils/not-found';
 import EmailExist from '../utils/email-exist';
 
@@ -25,26 +24,25 @@ export const getUser = (req: Request, res: Response, option: { _id: ID }, next: 
     .then((user) => res.status(SUCCESS).send({ data: user }))
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        throw new NotFound('Пользователь не найден');
+        next(new NotFound('Пользователь не найден'));
       }
       next(err);
     });
 };
 
 export function findUserInfo(req: RequestWithUserRole, res: Response, next: NextFunction) {
-  const { _id } = req.body;
-  getUser(req, res, { _id }, next);
+  const { _id } = req.params;
+  return getUser(req, res, { _id }, next);
 }
 
 export function getMyInfo(req: RequestWithUserRole, res: Response, next: NextFunction) {
-  getUser(req, res, { _id: req.user?._id }, next);
+  return getUser(req, res, { _id: req.user?._id }, next);
 }
 
 export const createUser = (req: Request, res: Response, next: NextFunction) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (!(email && password)) throw new InvalidRequest('Неверные данные');
   bcrypt.hash(password, 10)
     .then((hash) => userSchema.create({
       name, about, avatar, email, password: hash,
@@ -52,9 +50,9 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
       .then((user) => res.status(CREATED_SUCCESSFULLY).send({ data: user }))
       .catch((err) => {
         if (err instanceof mongoose.Error.ValidationError) {
-          throw new InvalidRequest('Переданы некорректные данные');
+          next(new InvalidRequest('Переданы некорректные данные'));
         }
-        if (err.code === 11000) throw new EmailExist('Такой адрес почты уже зарегистрирован');
+        if (err.code === 11000) next(new EmailExist('Такой адрес почты уже зарегистрирован'));
         next(err);
       }));
 };
@@ -65,9 +63,8 @@ const updateUser = (
   option: Object,
   next: NextFunction,
 ) => {
-  if (!req.user?._id) throw new InvalidID('Авторизованный пользователь не найден');
   userSchema.findByIdAndUpdate(
-    { _id: req.user._id },
+    { _id: req.user?._id },
     option,
     { new: true, runValidators: true },
   )
@@ -75,10 +72,10 @@ const updateUser = (
     .then((user) => res.status(SUCCESS).send({ data: user }))
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        throw new NotFound('Карточка не найдена');
+        next(new NotFound('Карточка не найдена'));
       }
       if (err instanceof mongoose.Error.ValidationError) {
-        throw new InvalidRequest('Переданы некорректные данные');
+        next(new InvalidRequest('Переданы некорректные данные'));
       }
       next(err);
     });
