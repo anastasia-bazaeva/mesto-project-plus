@@ -10,21 +10,18 @@ export interface RequestWithUserRole extends Request {
 }
 
 export const auth = (req: RequestWithUserRole, res: Response, next: NextFunction) => {
-  const { cookie } = req.headers;
+  const cookie = req.cookies.auth;
   if (!cookie) {
-    next(new Unauthorized('Неавторизованный пользователь'));
+    return next(new Unauthorized('Неавторизованный пользователь'));
   }
-  const token = cookie?.replace('Bearer ', '');
-  let payload: JwtPayload | string;
+  const token = cookie.replace();
+  let payload: string | JwtPayload | any;
   try {
-    if (token) {
-      payload = verify(token, JWT_SECRET);
-      req.user = { _id: payload };
-    } else {
-      next(new Unauthorized('Неавторизованный пользователь'));
-    }
+    payload = verify(token, JWT_SECRET);
+    const { _id } = payload;
+    req.user = { _id };
   } catch (err) {
     next(err);
   }
-  next();
+  return next();
 };
