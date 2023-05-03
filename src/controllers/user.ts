@@ -25,8 +25,9 @@ export const getUser = (req: Request, res: Response, option: { _id: ID }, next: 
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         next(new NotFound('Пользователь не найден'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -47,13 +48,20 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
     .then((hash) => userSchema.create({
       name, about, avatar, email, password: hash,
     })
-      .then((user) => res.status(CREATED_SUCCESSFULLY).send({ data: user }))
+      .then((user) => res.status(CREATED_SUCCESSFULLY).send({
+        data: {
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+          _id: user._id,
+        },
+      }))
       .catch((err) => {
         if (err instanceof mongoose.Error.ValidationError) {
           next(new InvalidRequest('Переданы некорректные данные'));
-        }
-        if (err.code === 11000) next(new EmailExist('Такой адрес почты уже зарегистрирован'));
-        next(err);
+        } else if (err.code === 11000) next(new EmailExist('Такой адрес почты уже зарегистрирован'));
+        else next(err);
       }));
 };
 
@@ -73,11 +81,9 @@ const updateUser = (
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         next(new NotFound('Карточка не найдена'));
-      }
-      if (err instanceof mongoose.Error.ValidationError) {
+      } else if (err instanceof mongoose.Error.ValidationError) {
         next(new InvalidRequest('Переданы некорректные данные'));
-      }
-      next(err);
+      } else next(err);
     });
 };
 

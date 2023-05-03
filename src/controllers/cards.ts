@@ -23,29 +23,30 @@ export const createCard = (req: RequestWithUserRole, res: Response, next: NextFu
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         next(new InvalidRequest('Введены некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
 export const deleteCard = (req: RequestWithUserRole, res: Response, next: NextFunction) => {
-  cardSchema.findByIdAndRemove(req.params.cardId)
+  cardSchema.findById(req.params.cardId)
     .orFail()
     .then((card) => {
       if (card.owner.toString() !== req.user?._id) {
         next(new Unauthorized('Вы не владелец карточки'));
       } else {
-        res.status(SUCCESS).send(card);
+        cardSchema.findByIdAndRemove(req.params.cardId)
+          .then((deletedCard) => res.status(SUCCESS).send(deletedCard))
+          .catch((err) => next(err));
       }
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         next(new NotFound('Карточка не найдена'));
-      }
-      if (err instanceof mongoose.Error.CastError) {
+      } else if (err instanceof mongoose.Error.CastError) {
         next(new InvalidID('Передан неверный ID'));
-      }
-      next(err);
+      } else next(err);
     });
 };
 
@@ -61,7 +62,8 @@ export const toggleLike = (req: RequestWithUserRole, res: Response, next: NextFu
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         next(new InvalidID('Передан неверный ID'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };

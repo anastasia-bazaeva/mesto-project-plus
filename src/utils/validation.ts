@@ -2,10 +2,10 @@ import { celebrate, Joi } from 'celebrate';
 import { linkRegExp } from './utils';
 
 const passwordJoi = Joi.string().required().min(3).max(50);
-const linkJoi = Joi.string().required().pattern(linkRegExp);
-const nameJoi = Joi.string().required().min(2).max(30);
-const aboutJoi = Joi.string().required().min(2).max(200);
-const idReqJoi = Joi.string().hex().required();
+const linkJoi = Joi.string().pattern(linkRegExp);
+const nameJoi = Joi.string().min(2).max(30);
+const aboutJoi = Joi.string().min(2).max(200);
+const idReqJoi = Joi.string().length(24).hex().required();
 
 export const signinValidation = celebrate({
   body: Joi.object().keys({
@@ -39,14 +39,14 @@ export const userUpdateValidation = celebrate({
 
 export const updateAvatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: linkJoi,
+    avatar: linkJoi.required(),
   }),
 });
 
 export const postCardValidation = celebrate({
   body: Joi.object().keys({
-    name: nameJoi,
-    link: linkJoi,
+    name: nameJoi.required(),
+    link: linkJoi.required(),
   }),
 });
 
@@ -58,6 +58,6 @@ export const deleteCardValidation = celebrate({
 
 export const likesValidation = celebrate({
   params: Joi.object().keys({
-    cardId: linkJoi,
+    cardId: idReqJoi,
   }),
 });
