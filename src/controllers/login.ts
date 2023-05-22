@@ -10,7 +10,6 @@ export const { JWT_SECRET = 'secret-key' } = process.env;
 const login = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
   return userSchema.findOne({ email }).select('+password')
-    .orFail()
     .then((user) => {
       if (!user) return next(new Unauthorized('Пользователь не авторизован'));
       return bcrypt.compare(password, user.password)

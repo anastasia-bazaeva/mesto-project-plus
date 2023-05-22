@@ -21,7 +21,7 @@ export const auth = (req: RequestWithUserRole, res: Response, next: NextFunction
     const { _id } = payload;
     req.user = { _id };
   } catch (err) {
-    next(err);
+    return next(new Unauthorized('Неверные данные для авторизации, пользователь не авторизован'));
   }
   return next();
 };
